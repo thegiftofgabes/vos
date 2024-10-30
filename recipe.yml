@@ -23,23 +23,34 @@ stages:
 
   # Put your custom actions behind this comment
 
-  - name: example-packages # Sample module using the built-in Apt module to install packages
-    type: apt
-    source:
-      packages:
-      - vim
-
-  - name: example-commands # Sample module demonstrating the Shell module with custom commands
+  - name: nvidia-official-repo
     type: shell
     commands:
-    - echo Example output
+    - curl -fSsL https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/3bf863cc.pub | gpg --dearmor -o /usr/share/keyrings/nvidia-drivers.gpg
+    - echo 'deb [signed-by=/usr/share/keyrings/nvidia-drivers.gpg] https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/ /' > /etc/apt/sources.list.d/nvidia-drivers.list
+    - apt-get update
 
-  - name: example-modules # Sample module demonstrating importing local and remote modules
-    type: includes
-    includes:
-      - modules/50-install-debs.yml # Sample local module present in this repository
-      - gh:vanilla-os/dev-image:main:modules/00-basics.yml # Sample GitHub remote module in the format: `gh:your-name/your-repo:branch:modules/file.yml`
-      - https://raw.githubusercontent.com/Vanilla-OS/dev-image/main/modules/05-go.yml # Sample full URL remote module
+  - name: nvidia-official-driver
+    type: shell
+    commands:
+    - apt-mark hold nvidia-kernel-open nvidia-driver nvidia-vaapi-driver nvidia-settings nvidia-persistenced nvidia-smi libnvidia-cfg1 libnvidia-glcore libnvidia-glvkspirv libnvidia-gpucomp libnvidia-fbc1 nvidia-container-toolkit
+    modules:
+      - name: install-nvidia
+        type: apt
+        source:
+          packages:
+          - nvidia-kernel-open
+          - nvidia-driver
+          - nvidia-vaapi-driver
+          - nvidia-settings
+          - nvidia-persistenced
+          - nvidia-smi
+          - libnvidia-cfg1
+          - libnvidia-glcore
+          - libnvidia-glvkspirv
+          - libnvidia-gpucomp
+          - libnvidia-fbc1
+          - nvidia-container-toolkit
 
   # Put your custom actions before this comment
 
